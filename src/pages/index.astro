@@ -1,0 +1,28 @@
+---
+import Layout from "../layouts/Layout.astro";
+
+// microCMS呼び出し
+import { getBlogList } from "../libs/microcms";
+const response = await getBlogList();
+---
+
+<Layout>
+  <main class="main">
+    <ul>
+      {
+        response.contents.map((content) => (
+          <li>
+            <a href={content.id}>{content.title}</a>
+          </li>
+        ))
+      }
+    </ul>
+  </main>
+</Layout>
+
+<style>
+  .main {
+    margin: 0 auto;
+    max-width: 960px;
+  }
+</style>
