@@ -1,5 +1,6 @@
 ---
 import Layout from "../layouts/Layout.astro";
+import Carousel from '../components/Carousel.astro';  
 
 // microCMS呼び出し
 import { getBlogList } from "../libs/microcms";
@@ -8,6 +9,7 @@ const response = await getBlogList();
 
 <Layout>
   <main class="main">
+    <Carousel />  
     <ul>
       {
         response.contents.map((content) => (

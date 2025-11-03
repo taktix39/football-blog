@@ -1,0 +1,27 @@
+body {
+  font-family: sans-serif; /* 読みやすいフォントに変更 */
+  background-color: #f4f4f4; /* 背景を薄いグレーに */
+  line-height: 1.6; /* 行間を少し空ける */
+}
+
+a {
+  color: #007bff; /* リンクの色を青に */
+  text-decoration: none; /* 下線を消す */
+}
+
+a:hover {
+  text-decoration: underline; /* ホバー時は下線を出す */
+}
+
+ul {
+  list-style: none; /* 箇条書きの「・」を消す */
+  padding-left: 0;
+}
+
+li {
+  background-color: #ffffff; /* 白いカード風に */
+  border: 1px solid #ddd;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  border-radius: 8px; /* 角を丸くする */
+}
