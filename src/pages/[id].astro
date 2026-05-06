@@ -56,20 +56,6 @@ const pageTitle = `${match.homeTeam} vs ${match.awayTeam} — Matchday Notes`
     </div>
   </header>
 
-  <!-- Thumbnail (optional) -->
-  {match.thumbnail && (
-    <div class="detail-section" style="margin-bottom: 28px;">
-      <img
-        src={match.thumbnail.url + '?w=800&q=80'}
-        alt={`${match.homeTeam} vs ${match.awayTeam}`}
-        width={800}
-        height={420}
-        style="width:100%; height:auto; border-radius: var(--radius-lg); object-fit: cover;"
-        loading="lazy"
-      />
-    </div>
-  )}
-
   <!-- 観戦ログ -->
   {(match.logBefore || match.logDuring || match.logAfter) && (
     <>
