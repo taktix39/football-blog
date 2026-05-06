@@ -438,6 +438,83 @@ img { max-width: 100%; display: block; }
 .rich-text li { margin-bottom: 5px; font-size: 14.5px; line-height: 1.65; }
 .rich-text strong { font-weight: 500; }
 
+/* ── Responsive (mobile) ─────────────────────────────────── */
+@media (max-width: 720px) {
+  /* Layout: サイドバーを上に、メインを下に */
+  .app-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .sidebar {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    height: auto;
+    border-right: none;
+    border-bottom: 1px solid var(--border);
+    padding: 12px 16px;
+    flex-direction: row;
+    align-items: center;
+    flex-wrap: nowrap;
+    gap: 0;
+    overflow-x: auto;
+  }
+
+  /* サイドバー統計・リーグフィルターは非表示 */
+  .sidebar-stats    { display: none; }
+  .sidebar > div:last-child { display: none; }
+
+  .site-name {
+    font-size: 14px;
+    white-space: nowrap;
+    flex-shrink: 0;
+    margin-right: 16px;
+    br { display: none; }
+  }
+
+  .sidebar nav {
+    display: flex;
+    flex-direction: row;
+    gap: 4px;
+    flex-shrink: 0;
+  }
+
+  .nav-section-label { display: none; }
+
+  .nav-item {
+    padding: 6px 10px;
+    font-size: 12px;
+    white-space: nowrap;
+  }
+
+  .main-content {
+    padding: 24px 16px 40px;
+  }
+
+  /* 記事カード */
+  .article-card {
+    padding: 14px 16px;
+    gap: 12px;
+  }
+  .article-title { font-size: 14px; }
+
+  /* 詳細ページ */
+  .detail-match-title { font-size: 22px; }
+  .score-hero-num     { font-size: 34px; }
+
+  /* タイムライン: 2カラム→1カラム */
+  .timeline-item {
+    grid-template-columns: 1fr;
+    gap: 6px;
+  }
+
+  /* 評点 */
+  .rating-row { grid-template-columns: 1fr auto 36px; }
+
+  /* 統計グリッド: 4→2カラム */
+  .stats-grid { grid-template-columns: 1fr 1fr; }
+}
+
 /* ── Scrollbar ───────────────────────────────────────────── */
 ::-webkit-scrollbar { width: 4px; }
 ::-webkit-scrollbar-track { background: transparent; }
