@@ -1,0 +1,41 @@
+---
+// src/components/ArticleCard.astro
+import type { Match } from '../types/microcms'
+import { LEAGUE_LABELS, LEAGUE_CLASS, getLeague, formatMatchDate } from '../types/microcms'
+
+interface Props {
+  match: Match
+}
+
+const { match } = Astro.props
+const league      = getLeague(match)
+const leagueLabel = LEAGUE_LABELS[league]
+const leagueClass = LEAGUE_CLASS[league]
+const date        = formatMatchDate(match.matchDate ?? match.publishedAt)
+
+// スニペット: logAfterの最初の文を抽出（HTMLタグを除去）
+const snippet = match.logAfter
+  ? match.logAfter.replace(/<[^>]+>/g, '').split(/[。！？\n]/)[0]
+  : ''
+---
+
+<a href={`/${match.id}`} class="article-card">
+  <div class="article-body">
+    <div class="article-meta">
+      <span class={`badge ${leagueClass}`}>{leagueLabel}</span>
+      <span class="article-date">{date}</span>
+      {match.round && <span class="article-round">{match.round}</span>}
+    </div>
+    <div class="article-title">{match.homeTeam} vs {match.awayTeam}</div>
+    {snippet && <div class="article-snippet">{snippet}</div>}
+  </div>
+
+  <!-- Score -->
+  <div class="score-box">
+    <div class="score-numbers">{match.scoreHome} – {match.scoreAway}</div>
+    <div class="score-teams">
+      <span>{match.homeAbbr}</span>
+      <span>{match.awayAbbr}</span>
+    </div>
+  </div>
+</a>

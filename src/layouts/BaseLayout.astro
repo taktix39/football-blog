@@ -1,0 +1,100 @@
+---
+// src/layouts/BaseLayout.astro
+import '../styles/global.css'
+import { getMatches } from '../lib/microcms'
+import { LEAGUE_LABELS, getLeague } from '../types/microcms'
+import type { League } from '../types/microcms'
+
+interface Props {
+  title?: string
+  currentLeague?: string
+}
+
+const { title = 'Matchday Notes', currentLeague = 'all' } = Astro.props
+
+// サイドバー用の統計を取得
+const { contents: allMatches } = await getMatches({ limit: 100 })
+const totalCount = allMatches.length
+
+const leagueCounts = allMatches.reduce<Record<string, number>>((acc, m) => {
+  const l = getLeague(m)
+  acc[l] = (acc[l] ?? 0) + 1
+  return acc
+}, {})
+
+const currentPath = Astro.url.pathname
+---
+
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{title}</title>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+</head>
+<body>
+  <div class="app-layout">
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <a href="/" class="site-name">
+        Matchday<br/><em>Notes</em>
+      </a>
+
+      <!-- Quick stats -->
+      <div class="sidebar-stats">
+        <div class="sidebar-stat">
+          <div class="sidebar-stat-num">{totalCount}</div>
+          <div class="sidebar-stat-label">観戦記録</div>
+        </div>
+        <div class="sidebar-stat">
+          <div class="sidebar-stat-num">{Object.keys(leagueCounts).length}</div>
+          <div class="sidebar-stat-label">リーグ</div>
+        </div>
+      </div>
+
+      <!-- Navigation -->
+      <nav>
+        <div class="nav-section-label">メニュー</div>
+        <a href="/" class={`nav-item ${currentPath === '/' ? 'active' : ''}`}>
+          <span class="nav-icon">📋</span> 観戦記録
+        </a>
+        <a href="/stats" class={`nav-item ${currentPath === '/stats' ? 'active' : ''}`}>
+          <span class="nav-icon">📊</span> 統計・振り返り
+        </a>
+      </nav>
+
+      <!-- League filter -->
+      <div>
+        <div class="nav-section-label">リーグ</div>
+        <a
+          href="/"
+          class={`league-filter ${currentLeague === 'all' ? 'active' : ''}`}
+        >
+          すべて
+          <span class="league-filter-count">{totalCount}</span>
+        </a>
+        {Object.entries(leagueCounts)
+          .sort((a, b) => b[1] - a[1])
+          .map(([league, count]) => (
+            <a
+              href={`/?league=${league}`}
+              class={`league-filter ${currentLeague === league ? 'active' : ''}`}
+            >
+              {LEAGUE_LABELS[league as League] ?? league}
+              <span class="league-filter-count">{count}</span>
+            </a>
+          ))
+        }
+      </div>
+    </aside>
+
+    <!-- Main -->
+    <main class="main-content">
+      <slot />
+    </main>
+
+  </div>
+</body>
+</html>

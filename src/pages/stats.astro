@@ -1,0 +1,105 @@
+---
+// src/pages/stats.astro
+import BaseLayout from '../layouts/BaseLayout.astro'
+import Ratings from '../components/Ratings.astro'
+import { getMatches, buildStats } from '../lib/microcms'
+import { LEAGUE_LABELS } from '../types/microcms'
+import type { League } from '../types/microcms'
+
+const { contents: matches } = await getMatches({ limit: 100 })
+const stats = buildStats(matches)
+
+// 評点トップ6
+const topRatings = matches
+  .flatMap(m => (m.ratings ?? []).map(r => ({ ...r, matchLabel: `${m.homeTeam} vs ${m.awayTeam}` })))
+  .sort((a, b) => b.score - a.score)
+  .slice(0, 6)
+
+const maxLeague = Math.max(...Object.values(stats.leagueCounts), 1)
+const maxMonth  = Math.max(...Object.values(stats.monthCounts), 1)
+---
+
+<BaseLayout title="統計・振り返り — Matchday Notes" currentLeague="all">
+  <div class="page-header">
+    <h1 class="page-title">統計<em>・</em>振り返り</h1>
+  </div>
+
+  <!-- Summary cards -->
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-card-num">{stats.total}</div>
+      <div class="stat-card-label">総観戦数</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-card-num">{Object.keys(stats.leagueCounts).length}</div>
+      <div class="stat-card-label">リーグ数</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-card-num" style="font-size:18px; margin-top:6px;">{stats.topClub}</div>
+      <div class="stat-card-label">最多登場クラブ</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-card-num">{stats.avgRating.toFixed(1)}</div>
+      <div class="stat-card-label">平均評点</div>
+    </div>
+  </div>
+
+  <!-- League chart -->
+  <div class="section-card">
+    <div class="section-card-title">リーグ別 観戦数</div>
+    {Object.entries(stats.leagueCounts)
+      .sort((a, b) => b[1] - a[1])
+      .map(([league, count]) => (
+        <div class="bar-row">
+          <div class="bar-label">{LEAGUE_LABELS[league as League] ?? league}</div>
+          <div class="bar-track">
+            <div class="bar-fill" style={`width: ${(count / maxLeague) * 100}%`}></div>
+          </div>
+          <div class="bar-num">{count}</div>
+        </div>
+      ))
+    }
+  </div>
+
+  <!-- Monthly chart -->
+  {Object.keys(stats.monthCounts).length > 0 && (
+    <div class="section-card">
+      <div class="section-card-title">月別 観戦数</div>
+      {Object.entries(stats.monthCounts)
+        .sort((a, b) => a[0].localeCompare(b[0]))
+        .map(([month, count]) => (
+          <div class="bar-row">
+            <div class="bar-label">{month}</div>
+            <div class="bar-track">
+              <div class="bar-fill" style={`width: ${(count / maxMonth) * 100}%`}></div>
+            </div>
+            <div class="bar-num">{count}</div>
+          </div>
+        ))
+      }
+    </div>
+  )}
+
+  <!-- Top ratings -->
+  {topRatings.length > 0 && (
+    <div class="section-card">
+      <div class="section-card-title">評点トップ選手</div>
+      <div class="ratings-list">
+        {topRatings.map(r => (
+          <div class="rating-row">
+            <div class="rating-player" style="font-size:12px;">
+              {r.player}
+              <span style="display:block; font-size:10px; color:var(--text-tertiary); font-family:var(--font-mono);">
+                {r.matchLabel}
+              </span>
+            </div>
+            <div class="rating-bar-wrap">
+              <div class="rating-bar-fill" style={`width: ${(r.score / 10) * 100}%`}></div>
+            </div>
+            <div class="rating-num">{r.score.toFixed(1)}</div>
+          </div>
+        ))}
+      </div>
+    </div>
+  )}
+</BaseLayout>

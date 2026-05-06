@@ -1,0 +1,26 @@
+---
+// src/components/Ratings.astro
+import type { PlayerRating } from '../types/microcms'
+
+interface Props {
+  ratings: PlayerRating[]
+}
+
+const { ratings } = Astro.props
+const sorted = [...ratings].sort((a, b) => b.score - a.score)
+---
+
+<div class="ratings-list">
+  {sorted.map(r => (
+    <div class="rating-row">
+      <div class={`rating-player ${r.isMom ? 'mom' : ''}`}>
+        {r.player}
+        {r.isMom && <span class="mom-badge">MOM</span>}
+      </div>
+      <div class="rating-bar-wrap">
+        <div class="rating-bar-fill" style={`width: ${(r.score / 10) * 100}%`}></div>
+      </div>
+      <div class="rating-num">{r.score.toFixed(1)}</div>
+    </div>
+  ))}
+</div>

@@ -1,0 +1,118 @@
+---
+// src/pages/[id].astro
+import BaseLayout from '../layouts/BaseLayout.astro'
+import Ratings from '../components/Ratings.astro'
+import { getMatch, getAllMatchIds } from '../lib/microcms'
+import { LEAGUE_LABELS, LEAGUE_CLASS, getLeague, formatMatchDate } from '../types/microcms'
+
+// 静的ビルド: 全IDをあらかじめ生成
+export async function getStaticPaths() {
+  const ids = await getAllMatchIds()
+  return ids.map(id => ({ params: { id } }))
+}
+
+const { id } = Astro.params
+const match = await getMatch(id!)
+
+const league      = getLeague(match)
+const leagueLabel = LEAGUE_LABELS[league]
+const leagueClass = LEAGUE_CLASS[league]
+const date        = formatMatchDate(match.matchDate ?? match.publishedAt)
+
+// ページタイトル
+const pageTitle = `${match.homeTeam} vs ${match.awayTeam} — Matchday Notes`
+---
+
+<BaseLayout title={pageTitle}>
+  <!-- Back -->
+  <a href="/" class="back-btn">← 記録一覧</a>
+
+  <!-- Header -->
+  <header class="detail-header">
+    <div class="detail-league-row">
+      <span class={`badge ${leagueClass}`}>{leagueLabel}</span>
+      {match.round && <span class="detail-round">{match.round}</span>}
+    </div>
+
+    <h1 class="detail-match-title">
+      {match.homeTeam} vs {match.awayTeam}
+    </h1>
+
+    <!-- Score -->
+    <div class="score-hero">
+      <div>
+        <div class="score-hero-num">{match.scoreHome}</div>
+        <div class="score-hero-team">{match.homeAbbr}</div>
+      </div>
+      <div class="score-hero-sep">–</div>
+      <div>
+        <div class="score-hero-num">{match.scoreAway}</div>
+        <div class="score-hero-team">{match.awayAbbr}</div>
+      </div>
+    </div>
+
+    <div class="detail-subinfo">
+      {date}{match.venue && ` · ${match.venue}`}
+    </div>
+  </header>
+
+  <!-- Thumbnail (optional) -->
+  {match.thumbnail && (
+    <div class="detail-section" style="margin-bottom: 28px;">
+      <img
+        src={match.thumbnail.url + '?w=800&q=80'}
+        alt={`${match.homeTeam} vs ${match.awayTeam}`}
+        width={800}
+        height={420}
+        style="width:100%; height:auto; border-radius: var(--radius-lg); object-fit: cover;"
+        loading="lazy"
+      />
+    </div>
+  )}
+
+  <!-- 観戦ログ -->
+  {(match.logBefore || match.logDuring || match.logAfter) && (
+    <>
+      <div class="detail-section">
+        <div class="section-header">
+          <span class="section-label">観戦ログ</span>
+        </div>
+        <div class="timeline">
+
+          {match.logBefore && (
+            <div class="timeline-item">
+              <div class="timeline-phase">試合前</div>
+              <div class="timeline-log rich-text" set:html={match.logBefore} />
+            </div>
+          )}
+
+          {match.logDuring && (
+            <div class="timeline-item">
+              <div class="timeline-phase">試合中</div>
+              <div class="timeline-log rich-text" set:html={match.logDuring} />
+            </div>
+          )}
+
+          {match.logAfter && (
+            <div class="timeline-item">
+              <div class="timeline-phase">試合後</div>
+              <div class="timeline-log rich-text" set:html={match.logAfter} />
+            </div>
+          )}
+
+        </div>
+      </div>
+      <hr class="divider" />
+    </>
+  )}
+
+  <!-- 評点 -->
+  {match.ratings && match.ratings.length > 0 && (
+    <div class="detail-section">
+      <div class="section-header">
+        <span class="section-label">評点・MOM</span>
+      </div>
+      <Ratings ratings={match.ratings} />
+    </div>
+  )}
+</BaseLayout>
